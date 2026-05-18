@@ -1,0 +1,5 @@
+/vendor/
+/storage/sessions/*.json
+/public/data/*.json
+!.gitkeep
+composer.lock

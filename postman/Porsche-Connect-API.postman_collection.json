@@ -1,0 +1,422 @@
+{
+  "info": {
+    "name": "Porsche Connect API (PHP)",
+    "description": "REST-API zum Testen des PHP Porsche Connect Clients.\n\n1. Server starten: `php -S localhost:8080 -t public` im Ordner php-porsche-connect-api\n2. POST /auth/login mit E-Mail und Passwort\n3. `sessionId` aus der Antwort als Variable `session_id` setzen (oder Header X-Session-Id)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "session_id",
+      "value": ""
+    },
+    {
+      "key": "vin",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.sessionId) pm.collectionVariables.set('session_id', json.sessionId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"deine@email.de\",\n  \"password\": \"dein-passwort\"\n}"
+            },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Submit Captcha",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"captcha_code\": \"ABC123\",\n  \"state\": \"STATE_AUS_LOGIN_ANTWORT\"\n}"
+            },
+            "url": "{{base_url}}/auth/captcha"
+          }
+        },
+        {
+          "name": "Get Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "List Vehicles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.vehicles && json.vehicles[0]) {",
+                  "  pm.collectionVariables.set('vin', json.vehicles[0].vin);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles"
+          }
+        },
+        {
+          "name": "Get Vehicle",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}"
+          }
+        },
+        {
+          "name": "Stored Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/overview/stored"
+          }
+        },
+        {
+          "name": "Current Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/overview/current"
+          }
+        },
+        {
+          "name": "Capabilities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/capabilities"
+          }
+        },
+        {
+          "name": "Trip Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/trip-statistics"
+          }
+        },
+        {
+          "name": "Pictures",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/pictures"
+          }
+        },
+        {
+          "name": "Location",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/location"
+          }
+        },
+        {
+          "name": "Battery Level",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/battery"
+          }
+        },
+        {
+          "name": "Doors and Lids",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/doors"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Remote Commands",
+      "item": [
+        {
+          "name": "Flash Indicators",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/flash"
+          }
+        },
+        {
+          "name": "Honk and Flash",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/honk-flash"
+          }
+        },
+        {
+          "name": "Climatise On",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetTemperature\": 293.15\n}"
+            },
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/climatise-on"
+          }
+        },
+        {
+          "name": "Climatise Off",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/climatise-off"
+          }
+        },
+        {
+          "name": "Direct Charge On",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/direct-charge-on"
+          }
+        },
+        {
+          "name": "Direct Charge Off",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/direct-charge-off"
+          }
+        },
+        {
+          "name": "Lock Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/lock"
+          }
+        },
+        {
+          "name": "Unlock Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pin\": \"DEIN_SPIN_HEX\"\n}"
+            },
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/unlock"
+          }
+        },
+        {
+          "name": "Update Charging Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minimumChargeLevel\": 80\n}"
+            },
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/charging-profile"
+          }
+        },
+        {
+          "name": "Update Charging Settings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Session-Id",
+                "value": "{{session_id}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetSoc\": 80\n}"
+            },
+            "url": "{{base_url}}/vehicles/{{vin}}/commands/charging-settings"
+          }
+        }
+      ]
+    }
+  ]
+}
